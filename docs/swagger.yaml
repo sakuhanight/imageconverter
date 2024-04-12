@@ -1,0 +1,117 @@
+info:
+  contact: {}
+paths:
+  /convert:
+    post:
+      consumes:
+      - multipart/form-data
+      description: convert file
+      parameters:
+      - description: format
+        in: query
+        name: format
+        required: true
+        type: string
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: dpi
+        in: query
+        name: dpi
+        type: string
+      - description: width
+        in: query
+        name: width
+        type: string
+      - description: height
+        in: query
+        name: height
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: convert file
+  /delete:
+    get:
+      consumes:
+      - application/json
+      description: delete file
+      parameters:
+      - description: filename
+        in: query
+        name: filename
+        type: string
+      - description: kind
+        in: query
+        name: kind
+        type: string
+      - description: id
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: delete file
+  /download:
+    get:
+      consumes:
+      - application/json
+      description: download file
+      parameters:
+      - description: filename
+        in: query
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: download file
+  /files:
+    get:
+      consumes:
+      - application/json
+      description: get file list
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: get file list
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: ping
+swagger: "2.0"
