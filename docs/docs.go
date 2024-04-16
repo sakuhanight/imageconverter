@@ -15,6 +15,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/delete": {
+            "get": {
+                "description": "delete file",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "delete file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "filename",
+                        "name": "filename",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "converted",
+                            "upload"
+                        ],
+                        "type": "string",
+                        "description": "保存種類。指定無しの場合` + "`" + `converted` + "`" + `として動作。",
+                        "name": "kind",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/convert": {
             "post": {
                 "description": "convert file",
@@ -27,15 +71,26 @@ const docTemplate = `{
                 "summary": "convert file",
                 "parameters": [
                     {
+                        "enum": [
+                            "pdf",
+                            "png",
+                            "gif",
+                            "png8",
+                            "webp",
+                            "bmp",
+                            "jpeg",
+                            "jpg",
+                            "tiff"
+                        ],
                         "type": "string",
-                        "description": "format",
+                        "description": "出力ファイルフォーマット",
                         "name": "format",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "file",
-                        "description": "file",
+                        "description": "入力ファイル",
                         "name": "file",
                         "in": "formData",
                         "required": true
@@ -57,45 +112,27 @@ const docTemplate = `{
                         "description": "height",
                         "name": "height",
                         "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/delete": {
-            "get": {
-                "description": "delete file",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "delete file",
-                "parameters": [
+                    },
                     {
                         "type": "string",
-                        "description": "filename",
-                        "name": "filename",
+                        "description": "x",
+                        "name": "x",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "kind",
-                        "name": "kind",
+                        "description": "y",
+                        "name": "y",
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "resize",
+                            "crop"
+                        ],
                         "type": "string",
-                        "description": "id",
-                        "name": "id",
+                        "description": "` + "`" + `width` + "`" + `もしくは` + "`" + `height` + "`" + `を指定した際の変形方法。指定無しの場合は` + "`" + `resize` + "`" + `として動作。",
+                        "name": "transformMode",
                         "in": "query"
                     }
                 ],

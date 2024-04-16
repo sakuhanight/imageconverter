@@ -1,18 +1,57 @@
 info:
   contact: {}
 paths:
+  /admin/delete:
+    get:
+      consumes:
+      - application/json
+      description: delete file
+      parameters:
+      - description: filename
+        in: query
+        name: filename
+        type: string
+      - description: 保存種類。指定無しの場合`converted`として動作。
+        enum:
+        - converted
+        - upload
+        in: query
+        name: kind
+        type: string
+      - description: id
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: delete file
   /convert:
     post:
       consumes:
       - multipart/form-data
       description: convert file
       parameters:
-      - description: format
+      - description: 出力ファイルフォーマット
+        enum:
+        - pdf
+        - png
+        - gif
+        - png8
+        - webp
+        - bmp
+        - jpeg
+        - jpg
+        - tiff
         in: query
         name: format
         required: true
         type: string
-      - description: file
+      - description: 入力ファイル
         in: formData
         name: file
         required: true
@@ -29,6 +68,21 @@ paths:
         in: query
         name: height
         type: string
+      - description: x
+        in: query
+        name: x
+        type: string
+      - description: "y"
+        in: query
+        name: "y"
+        type: string
+      - description: '`width`もしくは`height`を指定した際の変形方法。指定無しの場合は`resize`として動作。'
+        enum:
+        - resize
+        - crop
+        in: query
+        name: transformMode
+        type: string
       produces:
       - application/json
       responses:
@@ -37,32 +91,6 @@ paths:
           schema:
             type: string
       summary: convert file
-  /delete:
-    get:
-      consumes:
-      - application/json
-      description: delete file
-      parameters:
-      - description: filename
-        in: query
-        name: filename
-        type: string
-      - description: kind
-        in: query
-        name: kind
-        type: string
-      - description: id
-        in: query
-        name: id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: delete file
   /download:
     get:
       consumes:

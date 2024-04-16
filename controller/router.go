@@ -22,7 +22,7 @@ func Router() *gin.Engine {
 	r.POST("/convert", Convert)
 	r.GET("/files", GetFileList)
 	r.GET("/download", Download)
-	r.GET("/delete", Delete)
+	r.GET("/admin/delete", Delete)
 
 	docs.SwaggerInfo.BasePath = ""
 	r.GET("/api-docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
@@ -50,11 +50,14 @@ func Ping(c *gin.Context) {
 // @Description convert file
 // @Accept multipart/form-data
 // @Produce json
-// @Param format query string true "format"
-// @Param file formData file true "file"
+// @Param format query string true "出力ファイルフォーマット" Enums(pdf, png, gif, png8, webp, bmp, jpeg, jpg, tiff)
+// @Param file formData file true "入力ファイル"
 // @Param dpi query string false "dpi"
 // @Param width query string false "width"
 // @Param height query string false "height"
+// @Param x query string false "x"
+// @Param y query string false "y"
+// @Param transformMode query string false "`width`もしくは`height`を指定した際の変形方法。指定無しの場合は`resize`として動作。" Enums(resize, crop)
 // @Success 200 {object} string
 // @Router /convert [post]
 func Convert(c *gin.Context) {
@@ -119,19 +122,42 @@ func Convert(c *gin.Context) {
 		options = append(options, converter.SetDPI(dpi))
 	}
 
-	// サイズ変更
-	if c.Query("width") != "" && c.Query("height") != "" {
-		width, _ := strconv.Atoi(c.Query("width"))
-		height, _ := strconv.Atoi(c.Query("height"))
-		options = append(options, converter.SetSize(uint(width), uint(height)))
-	} else if (c.Query("width") != "" && c.Query("height") == "") || (c.Query("width") == "" && c.Query("height") != "") {
-		c.JSON(400, gin.H{
-			"message": "invalid size",
-		})
-		return
-	}
-
 	options = append(options, converter.ReadImage(path))
+
+	// サイズ変更
+	if c.Query("width") != "" || c.Query("height") != "" {
+		width, height := converter.GetSize(path)
+		x, y := 0, 0
+		switch c.DefaultQuery("transformMode", "resize") {
+		case "resize":
+			if c.Query("width") != "" {
+				w, _ := strconv.Atoi(c.Query("width"))
+				width = uint(w)
+			}
+			if c.Query("height") != "" {
+				h, _ := strconv.Atoi(c.Query("height"))
+				height = uint(h)
+			}
+			options = append(options, converter.SetSize(uint(width), uint(height)))
+		case "crop":
+			if c.Query("width") != "" {
+				w, _ := strconv.Atoi(c.Query("width"))
+				width = uint(w)
+			}
+			if c.Query("height") != "" {
+				h, _ := strconv.Atoi(c.Query("height"))
+				height = uint(h)
+			}
+			if c.Query("x") != "" {
+				x, _ = strconv.Atoi(c.Query("x"))
+			}
+			if c.Query("y") != "" {
+				y, _ = strconv.Atoi(c.Query("y"))
+			}
+			options = append(options, converter.Clop(width, height, x, y))
+		}
+
+	}
 
 	go converter.Write(filepath.Join(constant.CONVERTED_FILE_PATH, outputFilename), options...)
 	c.JSON(200, gin.H{
@@ -195,10 +221,10 @@ func Download(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param filename query string false "filename"
-// @Param kind query string false "kind"
+// @Param kind query string false "保存種類。指定無しの場合`converted`として動作。" Enums(converted, upload)
 // @Param id query string false "id"
 // @Success 200 {object} string
-// @Router /delete [get]
+// @Router /admin/delete [get]
 func Delete(c *gin.Context) {
 	filename := c.Query("filename")
 	id := c.Query("id")

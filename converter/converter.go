@@ -96,6 +96,18 @@ func SetSize(width, height uint) Option {
 	}
 }
 
+// Clop ...
+// 画像を切り取る
+func Clop(width, height uint, x, y int) Option {
+	return func(wand *imagick.MagickWand) {
+		err := wand.CropImage(width, height, x, y)
+		if err != nil {
+			zap.S().Errorf("failed to crop image: %v", err)
+		}
+		return
+	}
+}
+
 // SetPassphrase ...
 // パスフレーズを設定する
 func SetPassphrase(passphrase string) Option {
@@ -106,4 +118,18 @@ func SetPassphrase(passphrase string) Option {
 		}
 		return
 	}
+}
+
+// GetSize ...
+// 画像のサイズを取得する
+func GetSize(path string) (uint, uint) {
+	wand := imagick.NewMagickWand()
+	err := wand.ReadImage(path)
+	if err != nil {
+		zap.S().Errorf("failed to read image: %v", err)
+		return 0, 0
+	}
+	width := wand.GetImageWidth()
+	height := wand.GetImageHeight()
+	return width, height
 }
